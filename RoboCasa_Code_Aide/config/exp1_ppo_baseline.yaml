@@ -1,0 +1,30 @@
+experiment:
+  name: "exp1_ppo_baseline"
+  method: "ppo"
+  description: "PPO with reward shaping only (baseline)"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+training:
+  n_envs: 1
+  total_timesteps: 1_000_000
+  n_steps: 1024
+  batch_size: 64
+  n_epochs: 10
+  lr: 3.0e-4
+  ent_coef: 0.005
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+
+policy:
+  net_arch: [256, 256]
+
+logging:
+  save_dir: "checkpoints"
+  log_dir: "/tmp/gym"
+  use_wandb: true
+  wandb_project: "robocasa-pnp"

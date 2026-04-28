@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[oc]
+*.pyd
+*.pyo
+.Python
+
+# Build / packaging
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# uv
+.python-version
+uv.lock
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# Type checking
+.mypy_cache/
+.pyright/
+
+# IDEs
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# Training checkpoints (large model files)
+checkpoints/
+
+# WandB logs
+wandb/
+
+# Evaluation videos
+eval_videos/
+
+# Collected demos
+demos/
+
+# TensorBoard logs
+/tmp/gym/
+
+# MuJoCo / robosuite runtime files
+*.mjb
+*.xml.bak
+
+
+# Third-party dependencies (installed with pip install -e ., not our code)
+robocasa/
+robosuite/
