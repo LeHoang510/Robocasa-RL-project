@@ -1,0 +1,36 @@
+experiment:
+  name: "exp4_sac_her"
+  method: "sac_her"
+  description: "SAC + Hindsight Experience Replay (goal-conditioned)"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+# HER-specific settings
+her:
+  n_sampled_goal: 4              # hindsight goals relabelled per real transition
+                                 # higher = more synthetic successes, more memory
+  goal_selection_strategy: "future"  # relabel with goals achieved AFTER this step
+                                     # options: "future" (best), "final", "episode"
+  goal_threshold: 0.10           # metres — apple within this distance = success
+
+training:
+  total_timesteps: 3_000_000
+  buffer_size:     1_000_000
+  batch_size:      256
+  learning_starts: 1_000
+  lr:              3.0e-4
+  tau:             0.005
+  gamma:           0.99
+  ent_coef:        "auto"
+
+policy:
+  net_arch: [256, 256]
+
+logging:
+  save_dir: "checkpoints"
+  log_dir: "/tmp/gym"
+  use_wandb: true
+  wandb_project: "robocasa-pnp"

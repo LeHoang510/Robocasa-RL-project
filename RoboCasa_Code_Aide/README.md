@@ -9,12 +9,14 @@ This folder contains two parallel implementations:
 | `env/` + `rl_scripts/` | Original (skeleton) | Provided as starter code |
 | `my_env/` + `my_rl_scripts/` | **Complete implementation** | Our working code |
 
-The task is to train a **PandaOmron** robot to pick an apple from a kitchen counter and place it inside a cabinet (`PnPCounterToCab`), comparing two training methods:
+The task is to train a **PandaOmron** robot to pick an apple from a kitchen counter and place it inside a cabinet (`PnPCounterToCab`), comparing four training methods:
 
-| Experiment | Method | Config |
-|-----------|--------|--------|
-| exp1 | PPO + reward shaping (baseline) | `config/exp1_ppo_baseline.yaml` |
-| exp2 | PPO + reward shaping + curriculum learning | `config/exp2_curriculum.yaml` |
+| Experiment | Algorithm | Method | Script | Config |
+|-----------|-----------|--------|--------|--------|
+| exp1 | PPO | Reward shaping (baseline) | `train_ppo.py` | `exp1_ppo_baseline.yaml` |
+| exp2 | PPO | Reward shaping + curriculum | `train_ppo.py` | `exp2_curriculum.yaml` |
+| exp3 | SAC | Dense reward shaping | `train_sac.py` | `exp3_sac_baseline.yaml` |
+| exp4 | SAC+HER | Goal-conditioned + sparse reward | `train_sac.py` | `exp4_sac_her.yaml` |
 
 ---
 
@@ -22,23 +24,33 @@ The task is to train a **PandaOmron** robot to pick an apple from a kitchen coun
 
 ```bash
 # Exp 1 — PPO baseline
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp1_ppo_baseline.yaml
 
-# Exp 2 — Curriculum learning
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+# Exp 2 — PPO + curriculum
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp2_curriculum.yaml
+
+# Exp 3 — SAC baseline
+python RoboCasa_Code_Aide/my_rl_scripts/train_sac.py \
+    --config RoboCasa_Code_Aide/config/exp3_sac_baseline.yaml
+
+# Exp 4 — SAC + HER
+python RoboCasa_Code_Aide/my_rl_scripts/train_sac.py \
+    --config RoboCasa_Code_Aide/config/exp4_sac_her.yaml
 
 # Evaluate a trained model (10 episodes, save video)
 python RoboCasa_Code_Aide/my_rl_scripts/eval.py \
     --model_path checkpoints/<run>/final_model.zip \
     --episodes 10 --save_video
 
-# Compare both methods
+# Compare all methods
 python RoboCasa_Code_Aide/my_rl_scripts/eval_all.py \
     --models checkpoints/exp1_.../final_model.zip \
              checkpoints/exp2_.../final_model.zip \
-    --labels "PPO Baseline" "Curriculum" \
+             checkpoints/exp3_.../final_model.zip \
+             checkpoints/exp4_.../final_model.zip \
+    --labels "PPO" "PPO+Curriculum" "SAC" "SAC+HER" \
     --n_episodes 20 \
     --output results/comparison.png
 ```
@@ -46,7 +58,7 @@ python RoboCasa_Code_Aide/my_rl_scripts/eval_all.py \
 Any YAML value can be overridden from the CLI:
 
 ```bash
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp1_ppo_baseline.yaml \
     --total_timesteps 2000000 --seed 123
 ```

@@ -46,9 +46,7 @@ VIZ_CAMERAS = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
 #  Helpers                                                                     #
-# ─────────────────────────────────────────────────────────────────────────── #
 
 def render_tiled_frame(raw_env, camera_names=VIZ_CAMERAS, width=256, height=256):
     cols = 2
@@ -127,9 +125,7 @@ def evaluate_one(model_path: str, n_episodes: int, seed: int,
     return float(np.mean(successes)), float(np.mean(rewards)), float(np.std(rewards))
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
 #  Visualisation                                                               #
-# ─────────────────────────────────────────────────────────────────────────── #
 
 def plot_comparison(labels, success_rates, mean_rewards, save_dir: str):
     """Save a bar chart comparing success rates and mean rewards."""
@@ -163,10 +159,6 @@ def plot_comparison(labels, success_rates, mean_rewards, save_dir: str):
     plt.close()
     print(f"\n[INFO] Comparison chart saved → {out_path}")
 
-
-# ─────────────────────────────────────────────────────────────────────────── #
-#  Main                                                                        #
-# ─────────────────────────────────────────────────────────────────────────── #
 
 def main():
     parser = argparse.ArgumentParser(description="Compare all trained models")
@@ -207,7 +199,7 @@ def main():
         mean_rewards.append(mr)
         std_rewards.append(std)
 
-    # ── Summary table ────────────────────────────────────────────────── #
+    #Summary table
     print(f"\n{'='*60}")
     print(f"  {'Method':<20} {'Success':>10} {'Mean Reward':>14} {'Std':>8}")
     print(f"  {'─'*20} {'─'*10} {'─'*14} {'─'*8}")
@@ -215,7 +207,7 @@ def main():
         print(f"  {label:<20} {sr*100:>9.1f}%  {mr:>12.2f}  {std:>7.2f}")
     print(f"{'='*60}")
 
-    # ── Bar chart ────────────────────────────────────────────────────── #
+    #Bar chart
     plot_comparison(labels, success_rates, mean_rewards, args.chart_dir)
 
 

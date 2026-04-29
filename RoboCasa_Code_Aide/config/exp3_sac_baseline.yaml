@@ -1,0 +1,28 @@
+experiment:
+  name: "exp3_sac_baseline"
+  method: "sac"
+  description: "SAC with dense reward shaping — off-policy baseline"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+training:
+  total_timesteps: 3_000_000
+  buffer_size:     1_000_000   # replay buffer size (SAC is off-policy)
+  batch_size:      256          # larger batches work better for SAC
+  learning_starts: 1_000        # random exploration steps before first update
+  lr:              3.0e-4
+  tau:             0.005        # soft target network update rate
+  gamma:           0.99
+  ent_coef:        "auto"       # SAC auto-tunes entropy — no manual setting needed
+
+policy:
+  net_arch: [256, 256]
+
+logging:
+  save_dir: "checkpoints"
+  log_dir: "/tmp/gym"
+  use_wandb: true
+  wandb_project: "robocasa-pnp"

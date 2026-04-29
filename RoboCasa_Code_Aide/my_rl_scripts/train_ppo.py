@@ -1,23 +1,24 @@
 """
 PPO Training Script - PnPCounterToCab (RoboCasa)
 =================================================
-Supports all three experiment methods via YAML config:
+Supports exp1 and exp2 via YAML config:
   exp1 (ppo)        - PPO + reward shaping only
   exp2 (curriculum) - PPO + reward shaping + CurriculumCallback
-  exp3 (bc_ppo)     - use train_bc.py instead
+
+For SAC / SAC+HER experiments, use train_sac.py instead.
 
 Usage
 -----
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp1_ppo_baseline.yaml
 
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp2_curriculum.yaml
 
 # Override any YAML value from CLI:
-python RoboCasa_Code_Aide/my_rl_scripts/train.py \
+python RoboCasa_Code_Aide/my_rl_scripts/train_ppo.py \
     --config RoboCasa_Code_Aide/config/exp1_ppo_baseline.yaml \
-    --total_timesteps 2000000 --n_envs 8
+    --total_timesteps 2000000
 """
 
 import argparse

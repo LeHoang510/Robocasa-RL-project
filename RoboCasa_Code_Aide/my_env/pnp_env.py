@@ -202,23 +202,28 @@ class MyPnPCounterToCab(PickPlaceCounterToCabinet):
 
         r = 0.0
 
-        # Stage 1 - Reach: move gripper toward apple (inactive once grasped)
+        # Stage 1 – Reach: very small so it never dominates later stages.
+        # Max per episode: 0.02 × 500 = 10
         if not is_grasped and not obj_in_cab:
             dist_to_obj = np.linalg.norm(eef_pos - obj_pos)
-            r += 0.15 * (1.0 - np.tanh(5.0 * dist_to_obj))
+            r += 0.02 * (1.0 - np.tanh(5.0 * dist_to_obj))
 
-        # Stage 2 - Grasp bonus
+        # Stage 2 – Grasp (per step).
+        # Max per episode: 0.25 × 500 = 125
         if is_grasped:
             r += 0.25
-            # Stage 3 - Transport: minimise distance from apple to cabinet
+            # Stage 3 – Transport (per step, only while grasping).
+            # Max per episode: 0.20 × 500 = 100  →  grasp+transport max = 225
             dist_to_cab = OU.obj_fixture_bbox_min_dist(self, "obj", self.cab)
-            r += 0.30 * (1.0 - np.tanh(3.0 * dist_to_cab))
+            r += 0.20 * (1.0 - np.tanh(3.0 * dist_to_cab))
 
-        # Stage 4 - Placement inside cabinet
+        # Stage 4 – Placement: PER-STEP reward, much larger than grasp+transport.
+        # If placed at step 200 and held for 300 steps: 2.00 × 300 = 600 >> 225
+        # This makes placing strictly better than endless grasping.
         if obj_in_cab:
-            r += 1.00
-            # Stage 5 - Release: gripper backs away after placing
+            r += 2.00
+            # Stage 5 – Release: additional per-step reward on top of placement.
             if released:
-                r += 0.50
+                r += 1.00
 
         return r
