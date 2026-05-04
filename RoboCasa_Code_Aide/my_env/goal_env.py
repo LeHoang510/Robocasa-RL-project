@@ -98,10 +98,12 @@ class PnPGoalEnv(gym.Env):
         return self._wrap_obs(flat_obs), info
 
     def step(self, action):
-        flat_obs, reward, terminated, truncated, info = self.gym_env.step(action)
+        flat_obs, _dense_reward, terminated, truncated, info = self.gym_env.step(action)
         goal_obs = self._wrap_obs(flat_obs)
-        # HER requires 'is_success' in info for logging
         info["is_success"] = float(self.raw_env._check_success())
+        # Use the same sparse reward as compute_reward() so live and HER-relabelled
+        # transitions are on the same scale (dense reward would mismatch relabelled ones)
+        reward = float(self.compute_reward(self._apple_pos(), self._desired_goal, info))
         return goal_obs, reward, terminated, truncated, info
 
     def render(self):

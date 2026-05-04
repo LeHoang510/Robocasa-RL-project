@@ -71,3 +71,4 @@ demos/
 # Third-party dependencies (installed with pip install -e ., not our code)
 robocasa/
 robosuite/
+mimicgen/

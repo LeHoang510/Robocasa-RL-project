@@ -35,7 +35,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from my_env import MyPnPCounterToCab
 from robosuite.controllers import load_composite_controller_config
 from robosuite.wrappers.gym_wrapper import GymWrapper
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
+
+
+def _load_model(model_path: str, env):
+    path = model_path.replace(".zip", "")
+    if "sac" in os.path.basename(model_path).lower():
+        return SAC.load(path, env=env)
+    return PPO.load(path, env=env)
 
 
 VIZ_CAMERAS = [
@@ -91,7 +98,7 @@ def evaluate_one(model_path: str, n_episodes: int, seed: int,
         seed=seed,
     )
     env   = GymWrapper(raw_env, keys=None)
-    model = PPO.load(model_path.replace(".zip", ""), env=env)
+    model = _load_model(model_path, env=env)
 
     if save_video:
         os.makedirs(video_dir, exist_ok=True)
@@ -132,10 +139,11 @@ def plot_comparison(labels, success_rates, mean_rewards, save_dir: str):
     os.makedirs(save_dir, exist_ok=True)
     x = np.arange(len(labels))
 
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    _, axes = plt.subplots(1, 2, figsize=(10, 4))
+    colors = plt.cm.tab10.colors[:len(labels)]
 
     # Success rate
-    axes[0].bar(x, [r * 100 for r in success_rates], color=["#4C72B0", "#DD8452", "#55A868"])
+    axes[0].bar(x, [r * 100 for r in success_rates], color=colors)
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, fontsize=11)
     axes[0].set_ylabel("Success Rate (%)")
@@ -145,7 +153,7 @@ def plot_comparison(labels, success_rates, mean_rewards, save_dir: str):
         axes[0].text(i, v * 100 + 1.5, f"{v*100:.1f}%", ha="center", fontsize=10)
 
     # Mean reward
-    axes[1].bar(x, mean_rewards, color=["#4C72B0", "#DD8452", "#55A868"])
+    axes[1].bar(x, mean_rewards, color=colors)
     axes[1].set_xticks(x)
     axes[1].set_xticklabels(labels, fontsize=11)
     axes[1].set_ylabel("Mean Episode Reward")

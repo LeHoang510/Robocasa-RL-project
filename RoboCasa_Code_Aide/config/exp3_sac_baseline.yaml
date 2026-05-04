@@ -10,9 +10,10 @@ env:
 
 training:
   total_timesteps: 3_000_000
+  checkpoint_freq: 50_000
   buffer_size:     1_000_000   # replay buffer size (SAC is off-policy)
   batch_size:      256          # larger batches work better for SAC
-  learning_starts: 1_000        # random exploration steps before first update
+  learning_starts: 5_000        # ~10 full episodes of random exploration before first update
   lr:              3.0e-4
   tau:             0.005        # soft target network update rate
   gamma:           0.99

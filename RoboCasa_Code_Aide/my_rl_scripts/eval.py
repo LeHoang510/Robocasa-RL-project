@@ -26,7 +26,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from my_env import MyPnPCounterToCab
 from robosuite.controllers import load_composite_controller_config
 from robosuite.wrappers.gym_wrapper import GymWrapper
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
+
+
+def _load_model(model_path: str, env):
+    path = model_path.replace(".zip", "")
+    if "sac" in os.path.basename(model_path).lower():
+        return SAC.load(path, env=env)
+    return PPO.load(path, env=env)
 
 
 VIZ_CAMERAS = [
@@ -105,9 +112,8 @@ def main():
     env = GymWrapper(raw_env, keys=None)
 
     # Load trained model
-    model_path = args.model_path.replace(".zip", "")   # PPO.load handles ext
-    print(f"[INFO] Loading model: {model_path}.zip")
-    model = PPO.load(model_path, env=env)
+    print(f"[INFO] Loading model: {args.model_path}")
+    model = _load_model(args.model_path, env=env)
 
     # Video output directory
     if args.save_video:
@@ -128,7 +134,7 @@ def main():
 
         while not (done or truncated):
             action, _ = model.predict(obs, deterministic=True)
-            obs, reward, done, truncated, info = env.step(action)
+            obs, reward, done, truncated, _ = env.step(action)
             ep_reward += reward
 
             if args.save_video:

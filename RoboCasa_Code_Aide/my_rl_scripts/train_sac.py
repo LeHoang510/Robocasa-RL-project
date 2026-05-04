@@ -183,7 +183,7 @@ def main():
 
     # Callbacks
     checkpoint_cb = CheckpointCallback(
-        save_freq=max(10_000, 1),
+        save_freq=max(t_cfg.get("checkpoint_freq", 50_000), 1),
         save_path=os.path.join(save_path, "ckpts"),
         name_prefix="sac_pnp",
         verbose=1,

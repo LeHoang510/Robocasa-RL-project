@@ -11,6 +11,7 @@ env:
 training:
   n_envs: 1
   total_timesteps: 3_000_000
+  checkpoint_freq: 50_000
   n_steps: 1024
   batch_size: 64
   n_epochs: 10
