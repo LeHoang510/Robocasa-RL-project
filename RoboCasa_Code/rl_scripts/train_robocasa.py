@@ -1,4 +1,4 @@
-"""Train PPO on the custom RoboCasa counter-to-cabinet task."""
+"""Train PPO on the custom RoboCasa microwave button-press task."""
 
 import argparse
 import csv
@@ -17,7 +17,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from env import MyPnPCounterToCab
+from env import MyMicrowavePressButton
 from robosuite.controllers import load_composite_controller_config
 from robosuite.wrappers.gym_wrapper import GymWrapper
 
@@ -117,7 +117,7 @@ class TrainingCurveCallback(BaseCallback):
         plt.plot(x_smooth, smoothed, linewidth=2, label=f"mean/{window}")
         plt.xlabel("Episode")
         plt.ylabel("Reward")
-        plt.title("PPO training curve: MyPnPCounterToCab")
+        plt.title("PPO training curve: MyMicrowavePressButton")
         plt.grid(alpha=0.25)
         plt.legend()
         plt.tight_layout()
@@ -129,7 +129,7 @@ def make_env(args, rank: int):
     def _init():
         robots = "PandaOmron"
         controller_config = load_composite_controller_config(controller=None, robot=robots)
-        env = MyPnPCounterToCab(
+        env = MyMicrowavePressButton(
             robots=robots,
             controller_configs=controller_config,
             use_camera_obs=False,
@@ -154,11 +154,11 @@ def make_env(args, rank: int):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task", type=str, default="PnPCounterToCab")
+    parser.add_argument("--task", type=str, default="MicrowavePressButton")
     parser.add_argument("--total_timesteps", type=int, default=200_000)
     parser.add_argument("--n_envs", type=int, default=1)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--horizon", type=int, default=500)
+    parser.add_argument("--horizon", type=int, default=250)
     parser.add_argument("--headless", action="store_true", default=True)
     parser.add_argument("--learning_rate", type=float, default=3e-4)
     parser.add_argument("--n_steps", type=int, default=1024)
@@ -178,8 +178,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.task != "PnPCounterToCab":
-        raise ValueError("This project trains the custom PnPCounterToCab task.")
+    if args.task != "MicrowavePressButton":
+        raise ValueError("This project trains the custom MicrowavePressButton task.")
 
     if args.device.startswith("cuda"):
         print(
@@ -196,7 +196,7 @@ def main():
             )
 
     if args.output_dir is None:
-        run_name = datetime.now().strftime("pnp_counter_to_cab_%Y%m%d_%H%M%S")
+        run_name = datetime.now().strftime("microwave_press_button_%Y%m%d_%H%M%S")
         args.output_dir = Path("runs") / run_name
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "checkpoints").mkdir(exist_ok=True)

@@ -15,11 +15,11 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import threading
 
-from env.custom_pnp_counter_to_cab import register_custom_env
+from env.custom_microwave_press_button import register_custom_env
 register_custom_env()
 
 def main():
-    print("Creating 'MyPnPCounterToCab' environment...")
+    print("Creating 'MyMicrowavePressButton' environment...")
     
     camera_names = [
         "robot0_agentview_center",
@@ -31,7 +31,7 @@ def main():
     ]
     
     env = robosuite.make(
-        env_name="MyPnPCounterToCab",
+        env_name="MyMicrowavePressButton",
         robots="PandaOmron",
         has_renderer=True,
         has_offscreen_renderer=True,

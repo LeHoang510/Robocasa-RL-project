@@ -1,4 +1,4 @@
-"""Evaluate a trained PPO policy on the custom RoboCasa task."""
+"""Evaluate a trained PPO microwave button-press policy."""
 
 import argparse
 import os
@@ -12,7 +12,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from env import MyPnPCounterToCab
+from env import MyMicrowavePressButton
 from robosuite.controllers import load_composite_controller_config
 from robosuite.wrappers.gym_wrapper import GymWrapper
 
@@ -61,7 +61,7 @@ def render_tiled_frame(raw_env, camera_names=VIZ_CAMERAS, width=256, height=256)
 def make_eval_env(args):
     robots = "PandaOmron"
     controller_config = load_composite_controller_config(controller=None, robot=robots)
-    raw_env = MyPnPCounterToCab(
+    raw_env = MyMicrowavePressButton(
         robots=robots,
         controller_configs=controller_config,
         use_camera_obs=False,
@@ -82,11 +82,11 @@ def make_eval_env(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task", type=str, default="PnPCounterToCab")
+    parser.add_argument("--task", type=str, default="MicrowavePressButton")
     parser.add_argument("--model_path", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--episodes", type=int, default=10)
-    parser.add_argument("--horizon", type=int, default=500)
+    parser.add_argument("--horizon", type=int, default=250)
     parser.add_argument("--save_video", action="store_true")
     parser.add_argument("--video_path", type=Path, default=Path("eval_videos"))
     parser.add_argument(
@@ -100,8 +100,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.task != "PnPCounterToCab":
-        raise ValueError("This project evaluates the custom PnPCounterToCab task.")
+    if args.task != "MicrowavePressButton":
+        raise ValueError("This project evaluates the custom MicrowavePressButton task.")
 
     env = make_eval_env(args)
     model = PPO.load(str(args.model_path), env=env, device=args.device)
