@@ -67,6 +67,7 @@ def make_eval_env(args):
         use_camera_obs=False,
         has_renderer=False,
         has_offscreen_renderer=args.save_video,
+        reward_shaping=True,
         control_freq=20,
         ignore_done=False,
         horizon=args.horizon,
@@ -75,7 +76,7 @@ def make_eval_env(args):
         camera_widths=256,
         seed=args.seed,
         render_camera=VIZ_CAMERAS[0],
-    )
+        )
     raw_env.reset()
     return GymWrapper(raw_env, keys=None)
 
@@ -127,9 +128,14 @@ def main():
             episode_reward += float(reward)
             episode_success = episode_success or bool(env.env._check_success())
 
+
             if args.save_video:
                 frames.append(render_tiled_frame(env.env))
                 frames.append(render_tiled_frame(env.env))
+
+            if episode_success:
+                break
+            
 
         is_success = episode_success
         success_count += int(is_success)
