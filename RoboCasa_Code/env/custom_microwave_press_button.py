@@ -52,35 +52,41 @@ class MyMicrowavePressButton(MicrowavePressButton):
         )
 
     def reward(self, action=None):
+        # Success bonus
         if self._check_success():
             return 25.0
     
+        # Positions
         eef_pos = self._eef_pos()
         button_pos = self._button_pos()
         reach_dist = np.linalg.norm(eef_pos - button_pos)
     
+        # Shaped reaching reward (smooth, dense)
         reach_reward = 1.0 - np.tanh(8.0 * reach_dist)
     
-        contact_reward = 3.0 if self._button_pressed() else 0.0
+        # Binary signals (kept simple, scaled later)
+        contact_reward = 1.0 if self._button_pressed() else 0.0
     
         turned_on = self.microwave.get_state()["turned_on"]
-        press_reward = 10.0 if turned_on else 0.0
+        press_reward = 1.0 if turned_on else 0.0
     
-        release_reward = (
-            5.0
-            if turned_on and self.microwave.gripper_button_far(self, button=self._button_name())
-            else 0.0
-        )
+        release_reward = 1.0 if (
+            turned_on and self.microwave.gripper_button_far(
+                self, button=self._button_name()
+            )
+        ) else 0.0
     
+        # Small action penalty (stabilizes motion)
         action_penalty = 0.0
         if action is not None:
             action_penalty = 0.005 * float(np.square(action).mean())
     
+        # Final weighted reward
         return (
-            1.0 * reach_reward
-            + contact_reward
-            + press_reward
-            + release_reward
+            3.0 * reach_reward        # learn to go to button
+            + 3.0 * contact_reward   # encourage touching
+            + 10.0 * press_reward    # strong signal for activation
+            + 5.0 * release_reward   # move away after press
             - action_penalty
         )
 
