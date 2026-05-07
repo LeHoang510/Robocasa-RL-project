@@ -1,0 +1,38 @@
+experiment:
+  name: "exp6_diffusion"
+  method: "diffusion"
+  description: "Diffusion Policy (DDPM+DDIM) from robocasa mimicgen demonstrations"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+dataset:
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  split:        "all"
+  max_episodes: null
+  val_frac:     0.1
+
+training:
+  epochs:            200
+  batch_size:        256
+  lr:                1.0e-4       # lower than BC — diffusion loss landscape is flatter
+  weight_decay:      1.0e-4
+  n_diffusion_steps: 100          # T: number of forward-process noise steps
+  n_inference_steps: 10           # DDIM steps at eval — 10× faster than full reverse
+  eval_every:        20
+  eval_episodes:     30
+  device:            "auto"
+
+policy:
+  # Larger network than BC [64,64]: diffusion is a generative model and benefits
+  # from capacity; noise prediction is harder than direct regression.
+  net_arch:     [256, 256, 256]
+  time_emb_dim: 32
+  beta_schedule: "cosine"        # cosine schedule is smoother than linear
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

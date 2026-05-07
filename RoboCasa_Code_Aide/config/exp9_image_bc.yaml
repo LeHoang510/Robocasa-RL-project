@@ -1,0 +1,34 @@
+experiment:
+  name: "exp9_image_bc"
+  method: "image_bc"
+  description: "Image-conditioned behavioral cloning from RoboCasa videos + proprio"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+dataset:
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  split:        "all"
+  max_episodes: 50
+  val_frac:     0.1
+  camera_names: ["robot0_agentview_left", "robot0_eye_in_hand"]
+  image_size:   84
+
+training:
+  epochs:        30
+  batch_size:    16
+  lr:            1.0e-4
+  weight_decay:  1.0e-4
+  eval_every:    5
+  eval_episodes: 5
+  device:        "auto"
+
+policy:
+  mlp_arch: [256, 256]
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

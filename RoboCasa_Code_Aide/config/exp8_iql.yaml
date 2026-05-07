@@ -1,0 +1,41 @@
+experiment:
+  name: "exp8_iql"
+  method: "iql"
+  description: "Implicit Q-Learning offline RL from robocasa mimicgen demonstrations"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+dataset:
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  split:        "all"
+  max_episodes: null
+
+training:
+  n_gradient_steps: 200_000
+  batch_size:       256
+  actor_lr:         3.0e-4
+  critic_lr:        3.0e-4
+  value_lr:         3.0e-4
+  eval_every:       10_000
+  eval_episodes:    30
+  log_every:        1_000
+  device:           "auto"
+
+policy:
+  actor_arch:    [256, 256, 256]
+  critic_arch:   [256, 256, 256]
+  value_arch:    [256, 256, 256]
+  gamma:         0.99
+  tau:           0.005          # EMA rate for target critics
+  tau_expectile: 0.7            # expectile τ — higher = V approaches max_a Q
+                                # 0.7 is standard; try 0.9 for longer-horizon tasks
+  beta:          3.0            # AWR temperature — higher = more advantage weighting
+  adv_clip:      100.0          # clip exp(β·A) for numerical stability
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

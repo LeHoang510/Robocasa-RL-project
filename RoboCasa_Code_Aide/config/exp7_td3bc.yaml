@@ -1,0 +1,39 @@
+experiment:
+  name: "exp7_td3bc"
+  method: "td3bc"
+  description: "TD3+BC offline RL from robocasa mimicgen demonstrations"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+dataset:
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  split:        "all"
+  max_episodes: null
+
+training:
+  n_gradient_steps: 200_000    # offline RL is step-based, not epoch-based
+  batch_size:       256
+  actor_lr:         3.0e-4
+  critic_lr:        3.0e-4
+  eval_every:       10_000     # evaluate in env every N gradient steps
+  eval_episodes:    30
+  log_every:        1_000
+  device:           "auto"
+
+policy:
+  actor_arch:   [256, 256, 256]
+  critic_arch:  [256, 256, 256]
+  gamma:        0.99
+  tau:          0.005          # EMA rate for target networks
+  policy_noise: 0.2            # target policy smoothing std (in normalised [-1,1] space)
+  noise_clip:   0.5
+  policy_delay: 2              # update actor every 2 critic steps
+  alpha:        2.5            # BC weight — higher = stay closer to demos
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

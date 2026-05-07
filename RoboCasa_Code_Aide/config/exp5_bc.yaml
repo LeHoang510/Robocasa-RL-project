@@ -1,0 +1,38 @@
+experiment:
+  name: "exp5_bc"
+  method: "bc"
+  description: "Behavioral Cloning from robocasa mimicgen demonstrations"
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 500
+  seed: 42
+
+dataset:
+  # Root of the downloaded LeRobot dataset (contains data/, meta/ subdirs).
+  # This path is set automatically by download_datasets.py when DATASET_BASE_PATH
+  # is not configured — it lands inside the robocasa repo clone.
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+
+  split:        "all"     # load every available episode instead of the small train split
+  max_episodes: null      # null = use all episodes in the selected split
+  val_frac:     0.1       # fraction of transitions held out for validation loss
+
+training:
+  epochs:        200
+  batch_size:    256
+  lr:            3.0e-4
+  weight_decay:  1.0e-4   # L2 regularisation — critical for small datasets (~23k samples)
+  eval_every:    20        # run env evaluation every N epochs
+  eval_episodes: 30        # enough for reliable success rate (10 was too noisy)
+  device:        "auto"    # "auto" → cuda if available, else cpu
+
+policy:
+  # [64, 64] = 6,124 params vs ~23k training samples (ratio ~0.26)
+  # [256, 256] = 72,704 params — 3× the dataset size, guaranteed overfitting
+  net_arch: [64, 64]
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

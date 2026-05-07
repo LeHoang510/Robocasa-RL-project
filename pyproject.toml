@@ -8,4 +8,5 @@ dependencies = [
     "pyyaml>=6.0.3",
     "stable-baselines3>=2.8.0",
     "numpy==2.2.5",
+    "timm>=1.0.26",
 ]

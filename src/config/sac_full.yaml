@@ -1,0 +1,33 @@
+experiment:
+  name: "sac_full"
+  description: >
+    Stage 2 — full pick-and-place. FSM-gated reward (reach→grasp→lift→transport).
+    Initialize from stage-1 grasp checkpoint to skip grasp rediscovery.
+    Success = apple inside cabinet.
+
+env:
+  horizon:    300
+  seed:       42
+  grasp_only: false
+  difficulty: 0
+
+training:
+  total_timesteps: 500_000
+  buffer_size:     1_000_000
+  batch_size:      256
+  learning_starts: 5_000
+  lr:              1.0e-4
+  log_freq:        10_000
+  checkpoint_freq: 50_000
+  device:          "auto"
+
+policy:
+  net_arch:  [256, 256, 256]
+  gamma:     0.99
+  tau:       0.005
+  ent_coef:  0.3
+
+logging:
+  save_dir:      "src/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-sac"

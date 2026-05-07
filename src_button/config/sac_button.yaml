@@ -1,0 +1,36 @@
+experiment:
+  name: "sac_button"
+  description: >
+    SAC for StartCoffeeMachine (CoffeePressButton).
+    16D privileged obs: EEF pose (7) + gripper (2) + button_pos (3) +
+    eef_to_button (3) + turned_on flag (1).
+    Reward: reach shaping + press bonus + retreat shaping + 30×success.
+    No grasping needed — just reach the button and press it.
+    Expected convergence: ~200k steps.
+
+env:
+  horizon: 200
+  seed:    42
+
+training:
+  total_timesteps: 1_000_000
+  buffer_size:     1_000_000
+  batch_size:      256
+  learning_starts: 2_000
+  lr:              3.0e-4
+  log_freq:        5_000
+  eval_freq:       10_000
+  eval_episodes:   20
+  checkpoint_freq: 50_000
+  device:          "auto"
+
+policy:
+  net_arch: [256, 256, 256]
+  gamma:    0.99
+  tau:      0.005
+  ent_coef: "auto"   # same fix as GraspEnv — auto-tune avoids random-action trap
+
+logging:
+  save_dir:      "src_button/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-button"

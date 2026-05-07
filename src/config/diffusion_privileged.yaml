@@ -1,0 +1,41 @@
+experiment:
+  name: "diffusion_privileged"
+  description: >
+    Diffusion Policy with 25D privileged obs (eef pose + gripper + obj pose +
+    obj_to_eef + target_pos + obj_to_target). Re-simulates demos through
+    PrivilegedPnPEnv to collect ground-truth object state at each timestep.
+
+dataset:
+  dirs:
+    - "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/lerobot"
+    - "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  n_episodes_per_dir: 500   # 500 human + 500 mimicgen = 1000 episodes total
+  obs_horizon:    2
+  action_horizon: 8
+  cache_path:     "src/checkpoints/privileged_cache.npz"
+
+model:
+  hidden_dim:  512
+  n_blocks:    4
+  T_ddpm:      100
+  T_ddim:      10
+
+training:
+  epochs:        300
+  batch_size:    512
+  lr:            1.0e-4
+  weight_decay:  1.0e-6
+  val_frac:      0.05
+  log_every:     10
+  eval_every:    50
+  eval_episodes: 10
+  device:        "auto"
+
+env:
+  horizon: 300
+  seed:    42
+
+logging:
+  save_dir:      "src/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-diffusion"

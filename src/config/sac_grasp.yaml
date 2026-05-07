@@ -1,0 +1,33 @@
+experiment:
+  name: "sac_grasp"
+  description: >
+    Stage 1 — grasp only. Short horizon (150 steps), dense reach+grasp reward.
+    Success = hold apple for 5 consecutive steps. Target: success > 50%.
+    Transfer weights to sac_full when done.
+
+env:
+  horizon:    150       # short — robot only needs to reach and grasp
+  seed:       42
+  grasp_only: true
+  difficulty: 0         # easy placement to start
+
+training:
+  total_timesteps: 500_000
+  buffer_size:     500_000
+  batch_size:      256
+  learning_starts: 5_000
+  lr:              3.0e-4
+  log_freq:        10_000
+  checkpoint_freq: 50_000
+  device:          "auto"
+
+policy:
+  net_arch:  [256, 256, 256]
+  gamma:     0.99
+  tau:       0.005
+  ent_coef:  "auto"   # auto-tune entropy; ent_coef=0.3 kept policy too random
+
+logging:
+  save_dir:      "src/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-sac"

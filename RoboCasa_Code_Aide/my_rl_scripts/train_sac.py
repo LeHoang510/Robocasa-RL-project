@@ -28,6 +28,7 @@ from datetime import datetime
 
 import numpy as np
 import yaml
+import gymnasium as gym
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -49,6 +50,22 @@ try:
     WANDB_AVAILABLE = True
 except ImportError:
     WANDB_AVAILABLE = False
+
+
+class SuccessInfoWrapper(gym.Wrapper):
+    """Attach task success to info so callbacks can log real success rates."""
+
+    def __init__(self, env, raw_env):
+        super().__init__(env)
+        self.raw_env = raw_env
+
+    def reset(self, **kwargs):
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        info["success"] = float(self.raw_env._check_success())
+        return obs, reward, terminated, truncated, info
 
 
 class SuccessRateCallback(BaseCallback):
@@ -95,6 +112,7 @@ def make_env_sac(cfg: dict, rank: int):
     def _init():
         raw_env = _build_raw_env(cfg, rank)
         env     = GymWrapper(raw_env, keys=None)
+        env     = SuccessInfoWrapper(env, raw_env)
         log_dir = os.path.join(cfg["logging"]["log_dir"], str(rank))
         os.makedirs(log_dir, exist_ok=True)
         env = Monitor(env, log_dir)

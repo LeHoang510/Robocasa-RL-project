@@ -1,0 +1,40 @@
+experiment:
+  name: "exp9_sac_privileged"
+  method: "sac_privileged"
+  description: >
+    SAC with privileged state obs (25D: eef pose + gripper + obj pose + target pos
+    + relative vectors), FSM-gated dense reward (stage advances on actual task state),
+    and automatic entropy tuning. Strongest single-agent RL baseline for this task.
+
+env:
+  task: "PnPCounterToCab"
+  horizon: 300
+  seed: 42
+
+# Only needed if using --warmstart_demos > 0
+dataset:
+  dataset_dir: "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+
+training:
+  total_timesteps: 500_000      # privileged SAC should show clear progress by 500k
+  buffer_size:     1_000_000
+  batch_size:      256
+  learning_starts: 5_000        # collect random transitions before first update
+  lr:              1.0e-4       # lower LR prevents critic divergence
+  eval_freq:       10_000
+  eval_episodes:   20
+  checkpoint_freq: 50_000
+  device:          "auto"
+
+
+policy:
+  net_arch:       [256, 256, 256]
+  gamma:          0.99
+  tau:            0.005
+  ent_coef:       0.3          # fixed temperature — prevents collapse before grasping is discovered
+  target_entropy: -2           # kept for reference; unused when ent_coef is fixed
+
+logging:
+  save_dir:      "checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-pnp"

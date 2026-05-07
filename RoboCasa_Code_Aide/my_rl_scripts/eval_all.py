@@ -39,8 +39,9 @@ from stable_baselines3 import PPO, SAC
 
 
 def _load_model(model_path: str, env):
+    name = os.path.basename(model_path).lower()
     path = model_path.replace(".zip", "")
-    if "sac" in os.path.basename(model_path).lower():
+    if "sac" in name:
         return SAC.load(path, env=env)
     return PPO.load(path, env=env)
 

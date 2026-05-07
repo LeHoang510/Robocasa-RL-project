@@ -15,8 +15,8 @@ env:
 curriculum:
   initial_difficulty: 0
   num_levels: 3
-  success_threshold: 0.5   # advance when rolling success rate exceeds this
-  eval_window: 100          # number of recent episodes used to compute success rate
+  success_threshold: 0.2   # advance once easy placement is clearly being solved
+  eval_window: 20          # react faster during debugging / first-success runs
 
 training:
   n_envs: 1

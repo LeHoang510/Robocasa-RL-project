@@ -29,6 +29,7 @@ from datetime import datetime
 
 import numpy as np
 import yaml
+import gymnasium as gym
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -98,7 +99,7 @@ class CurriculumCallback(BaseCallback):
             rate = float(np.mean(self._successes))
             if rate >= self.success_threshold:
                 self.current_difficulty += 1
-                self.training_env.set_attr("difficulty", self.current_difficulty)
+                self.training_env.env_method("set_difficulty", self.current_difficulty)
                 self._successes.clear()
                 if self.verbose:
                     print(f"\n[CURRICULUM] success={rate:.2f} → "
@@ -112,13 +113,29 @@ class CurriculumCallback(BaseCallback):
         return True
 
 
+class SuccessInfoWrapper(gym.Wrapper):
+    """Attach task success to info so callbacks can log a real success rate."""
+
+    def __init__(self, env, raw_env):
+        super().__init__(env)
+        self.raw_env = raw_env
+
+    def reset(self, **kwargs):
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        info["success"] = float(self.raw_env._check_success())
+        return obs, reward, terminated, truncated, info
+
+
 def make_env(cfg: dict, rank: int):
     """Return a callable that creates one environment instance."""
     def _init():
         controller_config = load_composite_controller_config(
             controller=None, robot="PandaOmron",
         )
-        env = MyPnPCounterToCab(
+        raw_env = MyPnPCounterToCab(
             robots="PandaOmron",
             controller_configs=controller_config,
             use_camera_obs=False,
@@ -131,8 +148,11 @@ def make_env(cfg: dict, rank: int):
             horizon=cfg["env"]["horizon"],
             seed=cfg["env"]["seed"] + rank,
         )
-        env.reset()  # initialise robots before GymWrapper accesses robot_model
-        env = GymWrapper(env, keys=None)
+        if cfg["experiment"]["method"] == "curriculum":
+            raw_env.set_difficulty(cfg["curriculum"]["initial_difficulty"])
+        raw_env.reset()  # initialise robots before GymWrapper accesses robot_model
+        env = GymWrapper(raw_env, keys=None)
+        env = SuccessInfoWrapper(env, raw_env)
         log_dir = os.path.join(cfg["logging"]["log_dir"], str(rank))
         os.makedirs(log_dir, exist_ok=True)
         env = Monitor(env, log_dir)

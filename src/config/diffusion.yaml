@@ -1,0 +1,39 @@
+experiment:
+  name: "diffusion_policy"
+  description: >
+    Diffusion Policy trained on human (108 ep) + MimicGen (9880 ep) demos.
+    State-based obs (16D proprioception). Predicts action chunks of 8 steps.
+
+dataset:
+  dirs:
+    - "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/lerobot"
+    - "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/mg/demo/2025-08-20-21-56-25/lerobot"
+  obs_horizon:    2       # stack 2 consecutive frames → implicit velocity info
+  action_horizon: 8       # predict 8 steps ahead, execute all
+  max_episodes:   null    # null = use all episodes
+
+model:
+  hidden_dim:  512
+  n_blocks:    4
+  T_ddpm:      100    # diffusion steps during training
+  T_ddim:      10     # DDIM steps during inference (faster)
+
+training:
+  epochs:      200
+  batch_size:  512
+  lr:          1.0e-4
+  weight_decay: 1.0e-6
+  val_frac:    0.05
+  log_every:   10       # print train/val loss every N epochs
+  eval_every:  50       # env eval every N epochs (each eval ~5 min — keep infrequent)
+  eval_episodes: 10
+  device:      "auto"
+
+env:
+  horizon: 300
+  seed:    42
+
+logging:
+  save_dir:      "src/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-diffusion"

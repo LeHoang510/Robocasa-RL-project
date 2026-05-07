@@ -1,0 +1,49 @@
+experiment:
+  name: "act_resnet18"
+  description: >
+    ACT (Action Chunking with Transformers) with ResNet18 visual encoder.
+    Two cameras: agentview_right (external) + eye_in_hand (wrist).
+    Predicts 100-step action chunks from 128×128 images + 25D proprioception.
+
+data:
+  dataset_dirs:
+    - "robocasa/datasets/v1.0/pretrain/atomic/PickPlaceCounterToCabinet/20250819/lerobot"
+    - "robocasa/datasets/v1.0/target/atomic/PickPlaceCounterToCabinet/20250811/lerobot"
+  n_episodes_per_dir: 150        # 150+108=258 eps × 200 steps × 2 cam × 84² × 3 ≈ 2.7 GB
+  horizon:            300        # max steps per episode during collection
+  camera_names:
+    - "robot0_agentview_right"
+    - "robot0_eye_in_hand"
+  img_h: 84
+  img_w: 84
+  cache_path: "src/cache/act_demos.npz"
+
+model:
+  chunk_size:  40         # 30-50 is optimal for pick-and-place; 100 blurs grasp timing
+  hidden_dim:  512        # transformer hidden dimension
+  n_heads:     8          # attention heads
+  enc_layers:  4          # CVAE encoder layers
+  dec_layers:  7          # decoder layers
+  latent_dim:  32         # CVAE latent dim
+  kl_weight:   1.0e-3     # keep KL as regulariser only; 10.0 causes latent collapse
+  dropout:     0.1
+  pretrained_backbone: true
+  temporal_agg_gamma:  0.01   # lower → blend more history in temporal ensemble
+
+training:
+  epochs:          300
+  batch_size:      32
+  lr:              1.0e-4
+  weight_decay:    1.0e-4
+  val_frac:        0.1
+  seed:            42
+  num_workers:     4
+  log_every:       5          # log metrics every N epochs
+  eval_every:      50         # run env eval every N epochs
+  n_eval_episodes: 5
+  device:          "auto"
+
+logging:
+  save_dir:      "src/checkpoints"
+  use_wandb:     true
+  wandb_project: "robocasa-act"
