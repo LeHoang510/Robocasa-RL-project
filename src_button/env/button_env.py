@@ -183,21 +183,29 @@ class ButtonPressEnv(gym.Env):
 # ---------------------------------------------------------------------------
 
 def make_env(
-    horizon:      int  = 200,
-    seed:         int  = 0,
-    has_renderer: bool = False,
+    horizon:               int  = 200,
+    seed:                  int  = 0,
+    has_renderer:          bool = False,
+    has_offscreen_renderer: bool = False,
+    camera_names:          list | None = None,
+    camera_size:           int  = 256,
 ) -> ButtonPressEnv:
     ctrl = load_composite_controller_config(controller=None, robot="PandaOmron")
-    raw = ButtonEnv(
+    kwargs: dict = dict(
         robots="PandaOmron",
         controller_configs=ctrl,
         use_camera_obs=False,
         has_renderer=has_renderer,
-        has_offscreen_renderer=False,
+        has_offscreen_renderer=has_offscreen_renderer,
         reward_shaping=True,
         control_freq=20,
         ignore_done=False,
         horizon=horizon,
         seed=seed,
     )
+    if camera_names:
+        kwargs["camera_names"]   = camera_names
+        kwargs["camera_heights"] = camera_size
+        kwargs["camera_widths"]  = camera_size
+    raw = ButtonEnv(**kwargs)
     return ButtonPressEnv(raw)

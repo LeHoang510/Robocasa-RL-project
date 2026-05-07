@@ -1,18 +1,11 @@
 """
-Visualize a trained SAC policy on StartCoffeeMachine.
-Always renders all 4 cameras via offscreen renderer.
-Optionally saves a tiled MP4 per episode.
+Record 4-camera tiled video of the SAC grasp policy.
 
 Usage
 -----
-python src_button/scripts/visualize.py \
-    --model src_button/checkpoints/<run>/best_model \
-    --episodes 5
-
-python src_button/scripts/visualize.py \
-    --model src_button/checkpoints/<run>/best_model \
+python src/scripts/record_grasp.py \
+    --model src/checkpoints/sac_grasp_20260506_003957/final \
     --episodes 5 \
-    --save_video \
     --video_path eval_videos
 """
 
@@ -24,8 +17,9 @@ import imageio
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from env.button_env import make_env
+from env.pnp_env import PnPEnv, GraspEnv
 from stable_baselines3 import SAC
+from robosuite.controllers import load_composite_controller_config
 
 VIZ_CAMERAS = [
     "robot0_agentview_center",
@@ -70,61 +64,67 @@ def render_tiled_frame(raw_env, camera_names=VIZ_CAMERAS, width=256, height=256)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model",      type=str, required=True,
-                        help="Path to trained model zip (without .zip)")
+                        help="Path to SAC checkpoint (without .zip)")
     parser.add_argument("--episodes",   type=int, default=5)
     parser.add_argument("--seed",       type=int, default=42)
-    parser.add_argument("--horizon",    type=int, default=200)
-    parser.add_argument("--save_video", action="store_true",
-                        help="Save 4-camera tiled MP4 for each episode")
     parser.add_argument("--video_path", type=str, default="eval_videos",
                         help="Directory to save videos")
     args = parser.parse_args()
 
-    print(f"\n[Visualize] Loading SAC model from {args.model}")
+    print(f"\n[Record] Loading SAC grasp model from {args.model}")
     model = SAC.load(args.model, device="cpu")
 
-    # Always use offscreen renderer with all 4 cameras registered
-    env = make_env(
-        horizon=args.horizon,
-        seed=args.seed,
+    ctrl = load_composite_controller_config(controller=None, robot="PandaOmron")
+    raw_env = PnPEnv(
+        robots="PandaOmron",
+        controller_configs=ctrl,
+        use_camera_obs=False,
         has_renderer=False,
         has_offscreen_renderer=True,
+        reward_shaping=True,
+        control_freq=20,
+        ignore_done=False,
+        horizon=150,
+        seed=args.seed,
         camera_names=VIZ_CAMERAS,
-        camera_size=256,
+        camera_heights=256,
+        camera_widths=256,
     )
+    raw_env.set_difficulty(0)
+    env = GraspEnv(raw_env)
 
-    if args.save_video:
-        run_name = os.path.basename(os.path.dirname(args.model))
-        video_dir = os.path.join(args.video_path, run_name)
-        os.makedirs(video_dir, exist_ok=True)
+    run_name = os.path.basename(os.path.dirname(args.model))
+    video_dir = os.path.join(args.video_path, run_name)
+    os.makedirs(video_dir, exist_ok=True)
 
-    success_count = 0
+    successes = []
 
     for ep in range(args.episodes):
         obs, _ = env.reset(seed=args.seed + ep)
         done = False
         truncated = False
-        frames = []
         ep_reward = 0.0
+        info = {}
+        frames = []
 
         while not (done or truncated):
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, done, truncated, info = env.step(action)
             ep_reward += reward
-
-            # Render all four cameras and stitch into one composite frame
-            composite = render_tiled_frame(env.raw_env, VIZ_CAMERAS, width=256, height=256)
-            frames.append(composite)
+            frames.append(render_tiled_frame(raw_env, VIZ_CAMERAS))
 
         is_success = bool(info.get("is_success", 0))
         if is_success:
-            success_count += 1
+            successes.append(True)
+        else:
+            successes.append(False)
 
         print(f"Episode {ep+1}/{args.episodes}  steps={len(frames):3d}  "
               f"reward={ep_reward:6.1f}  success={is_success}  "
+              f"grasp={info.get('rc/grasp', 0):.2f}  "
               f"dist={info.get('rc/dist', 0):.3f}")
 
-        if args.save_video and frames:
+        if frames:
             vid_path = os.path.join(
                 video_dir,
                 f"eval_ep_{ep+1:02d}_{'ok' if is_success else 'fail'}.mp4",
@@ -132,9 +132,9 @@ def main():
             imageio.mimsave(vid_path, frames, fps=20)
             print(f"  Saved multi-camera video ({len(VIZ_CAMERAS)} views) → {vid_path}")
 
-    print(f"\nSuccess Rate: {success_count}/{args.episodes} "
-          f"({success_count/args.episodes*100:.2f}%)")
     env.close()
+    print(f"\nSuccess Rate: {sum(successes)}/{args.episodes} "
+          f"({sum(successes)/args.episodes*100:.2f}%)")
 
 
 if __name__ == "__main__":
