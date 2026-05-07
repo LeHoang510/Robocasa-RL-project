@@ -1,10 +1,11 @@
 # Robot Manipulation Learning - Project Report
+GitHub: [LeHoang510/Robocasa-RL-project](https://github.com/LeHoang510/Robocasa-RL-project)
 
 Project Drive: <https://drive.google.com/drive/folders/1HE1ZfvGqZCAy_0qYc3lcxlwaDj3IEOvQ?usp=drive_link>
 
 **Course:** Robotique - Telecom Paris S3  
 **Task:** PnPCounterToCabinet (Pick apple from counter, place in cabinet) and CoffeePressButton  
-**Robot:** PandaOmron (7-DOF arm + mobile base, 12D action space)  
+**Robot:** PandaOmron
 **Simulator:** RoboCasa
 
 ---

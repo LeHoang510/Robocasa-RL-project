@@ -1,5 +1,8 @@
 # Robot Manipulation Project
 
+GitHub: [LeHoang510/Robocasa-RL-project](https://github.com/LeHoang510/Robocasa-RL-project)
+
+
 Project Drive: <https://drive.google.com/drive/folders/1HE1ZfvGqZCAy_0qYc3lcxlwaDj3IEOvQ?usp=drive_link>
 
 This repository contains our Robotique project on manipulation learning in RoboCasa.
